@@ -14,6 +14,8 @@
 ```
 ## Configuring Kubernetes Networking for Virtual Machines
 
+## Connecting Virtual Machines to External Networks
+
 
 ## Extra things you may want to brush up on:
 - Installing a yum repo in Linux

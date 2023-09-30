@@ -144,7 +144,127 @@ $ oc adm drain worker02 --ignore-daemonsets --delete-emptydir-data --force
 .
 node/worker02 drained
 ```
+## Creating a service between two running VMIs
+- given that each VMI has the label app=web
+
+(example vm config under "template")
+```
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: web <----------(LOOK)
+        flavor.template.kubevirt.io/small: "true"
+```
+- create a `service` of type `ClusterIP` with a selector based on `app: web`
+
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+  namespace: my-namespace
+spec:
+  type: ClusterIP
+  selector:
+    app: web
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+```
+
+Verify two endpoints
+
+```
+$ oc get endpoints
+NAME   ENDPOINTS                    AGE
+web    10.11.0.28:80,10.8.2.20:80   2m13s
+```
+## add a cookie annotation to a route object
+```
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    router.openshift.io/cookie_name: web
+```
+
+- calling the url using the cookie with curl
+```
+(create cookie)
+$ curl web.apps.ocp4.example.com -c /tmp/my_cookie
+Welcome to www1
+
+(use cookie)
+$ curl web.apps.ocp4.example.com -b /tmp/my_cookie
+Welcome to www1
+```
+## Adding a readiness probe to a VM that uses HTTP GET requests to test the /health 
+https://docs.openshift.com/container-platform/4.10/applications/application-health.html
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    test: health-check
+  name: my-application
+spec:
+  containers:
+  - name: my-container 
+    args:
+    image: k8s.gcr.io/goproxy:0.1 
+    readinessProbe: 
+      httpGet: 
+        path: /health
+        port: 80
+      failureThreshold: 2
+      successThreshold: 1
+      periodSeconds: 5
+      timeoutSeconds: 2 
+```
+
+## Adding a i6300esb watchdog device to a VM to power off if OS is unresponsive
+https://docs.openshift.com/container-platform/4.10/virt/virtual_machines/advanced_vm_management/virt-configuring-a-watchdog.html
+
+```
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  labels:
+    kubevirt.io/vm: vm2-rhel84-watchdog
+  name: <vm-name>
+spec:
+  running: false
+  template:
+    spec:
+      domain:
+        devices:
+          watchdog:
+            name: <watchdog>
+            i6300esb:
+              action: "poweroff" 
+...
+```
+
+## A VM listens on TCP port 3306. Add a liveness probe that tests the service by sending requests to the TCP socket
+https://docs.openshift.com/container-platform/4.10/applications/application-health.html
+```
+# ...
+spec:
+  domain:
+     ....stuff....
+  livenessProbe:
+    initialDelaySeconds: 2 
+    periodSeconds: 2
+    tcpSocket: 
+      port: 3306 
+    timeoutSeconds: 10 
+# ...
+```
 
 ## Extra things you may want to brush up on:
+- whenever you make changes to a VMs yaml config, save and reload to make sure your changes are still there.  
+  Sometimes if there is a mistake, it will simply be erased and you will wonder why your probes arent working.
 - Installing a yum repo in Linux
 - user and group policy management in OpenShift

@@ -126,6 +126,24 @@ spec:
 for PVC creation, use the yaml template in the console to fill out the information.   
 DO NOT USE `storageclass` when using external fileshare
 
+## Restoring a snapshot volume to a PVC
+
+- Go to Storage -> VolumeSnapshots to find the volume and restore as new PVC
+
+## Setting a node to maintenance mode and draining workloads to remaining nodes
+
+```
+$ oc adm cordon worker02
+node/worker02 cordoned
+
+$ oc adm drain worker02 --ignore-daemonsets --delete-emptydir-data --force
+.
+.
+.
+(wait a sec)
+.
+node/worker02 drained
+```
 
 ## Extra things you may want to brush up on:
 - Installing a yum repo in Linux

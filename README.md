@@ -264,7 +264,9 @@ spec:
 ```
 
 ## Extra things you may want to brush up on:
-- whenever you make changes to a VMs yaml config, save and reload to make sure your changes are still there.  
-  Sometimes if there is a mistake, it will simply be erased and you will wonder why your probes arent working.
+- whenever you make changes to a VMs yaml config, save and reload to ensure your changes are still there.  
+  Sometimes, if there is a mistake, it will be erased, and you will wonder why your probes aren't working.
+- one trick for creating readiness and liveness probes for VMs is to create a deployment, and use the form to creat
+  them, and then copy/paste it to vm config. Make sure `ReadienessProbe` is lowercase `readinessProbe`
 - Installing a yum repo in Linux
 - user and group policy management in OpenShift

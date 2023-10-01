@@ -269,4 +269,7 @@ spec:
 - one trick for creating readiness and liveness probes for VMs is to create a deployment, and use the form to creat
   them, and then copy/paste it to vm config. Make sure `ReadienessProbe` is lowercase `readinessProbe`
 - Installing a yum repo in Linux
+```
+$ sudo yum-config-manager --add-repo http://www.example.com/example.repo
+```
 - user and group policy management in OpenShift

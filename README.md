@@ -271,5 +271,7 @@ spec:
 - Installing a yum repo in Linux
 ```
 $ sudo yum-config-manager --add-repo http://www.example.com/example.repo
+
+$ sudo yum-config-manager --enable example
 ```
 - user and group policy management in OpenShift
